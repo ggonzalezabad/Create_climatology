@@ -23,6 +23,11 @@ MODULE GEOSChem_he5_module
   ! --------------------------
   REAL*4, PARAMETER :: VMRtoPPM = 1E6
 
+  ! -----------
+  ! Dobson unit
+  ! -----------
+  REAL*4, PARAMETER :: du = 2.6870918078e16
+
   ! ----------------------
   ! Hybrid grid definition
   ! ----------------------

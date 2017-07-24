@@ -302,7 +302,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                     val = linInterpol(nlon,nlat,REAL(GC_lon,8),REAL(GC_lat,8), &
                          REAL(GC_HCHO(1:nlon,1:nlat,ilev,ihrs),8), REAL(out_lon(ilon),8), &
                          REAL(out_lat(ilat),8), status = status)
-                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79
+                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79*DU
                  END DO
               END DO
               ! -------------------------
@@ -331,7 +331,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                     val = linInterpol(nlon,nlat,REAL(GC_lon,8),REAL(GC_lat,8), &
                          REAL(GC_O3(1:nlon,1:nlat,ilev,ihrs),8), REAL(out_lon(ilon),8), &
                          REAL(out_lat(ilat),8), status = status)
-                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79
+                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79*DU
                     ! Work out corresponding LUT ozone profile
                  END DO              
                  !Fill up the LUT Ozone Profile output array based on Xiong's climatology
@@ -379,7 +379,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                     val = linInterpol(nlon,nlat,REAL(GC_lon,8),REAL(GC_lat,8), &
                          REAL(GC_H2O(1:nlon,1:nlat,ilev,ihrs),8), REAL(out_lon(ilon),8), &
                          REAL(out_lat(ilat),8), status = status)
-                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79
+                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79*DU
                  END DO
               END DO
               ! -------------------------
@@ -408,7 +408,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                     val = linInterpol(nlon,nlat,REAL(GC_lon,8),REAL(GC_lat,8), &
                          REAL(GC_NO2(1:nlon,1:nlat,ilev,ihrs),8), REAL(out_lon(ilon),8), &
                          REAL(out_lat(ilat),8), status = status)
-                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79
+                    out_data_4d(ilon,ilat,ilev,ihrs) = REAL(val,4)*VMRtoPPM*deltap*0.79*DU
                  END DO
               END DO
               ! -------------------------
