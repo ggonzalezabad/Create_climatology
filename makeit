@@ -1,0 +1,24 @@
+#!/bin/bash
+
+export FLAVOR=linux64
+export OMIUTIL=/data/tempo2/ggonzale/lib/gfortran
+source $OMIUTIL/sdptk/SDPTK5.2.18v1.00/TOOLKIT/bin/$FLAVOR/pgs-dev-env.ksh
+
+echo ${OMIUTIL} ${FFLAGS} ${HDF5INC} ${HDFEOS5_INC} ${HDF5LIB} ${HDFEOS5_LIB} ${HE5LIBS} ${ADDLIBS}
+
+export ADDLIBS='-ljpeg -lz -lsz -llinterp'
+export HE5LIBS='-lhe5_hdfeos -lhdf5_hl -lhdf5'
+
+export GGAINC=/home/ggonzale/TOOLS/FORTRAN/lib
+export GGALIB=/home/ggonzale/TOOLS/FORTRAN/lib
+
+export FFLAGS=' -O3  -Wall -Bstatic -static -Wextra -fcheck=all -fbounds-check -fbacktrace'
+
+MAIN=GEOSChem_he5_create
+
+gfortran ${FFLAGS} GEOSChem_he5_module.f90 ${MAIN}.f90 -o ${MAIN}.x \
+    -I${OMIUTIL}/include -I${HDF5INC} -I${HDFEOS5_INC}  -I${GGAINC} \
+    -L${OMIUTIL}/lib     -L${HDF5LIB} -L${HDFEOS5_LIB}  -L${GGAINC} \
+    ${HE5LIBS} ${ADDLIBS}
+
+rm -f *.o *.mod
