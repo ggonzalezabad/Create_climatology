@@ -12,6 +12,7 @@ export HE5LIBS='-lhe5_hdfeos -lhdf5_hl -lhdf5'
 export GGAINC=/home/ggonzale/TOOLS/FORTRAN/lib
 export GGALIB=/home/ggonzale/TOOLS/FORTRAN/lib
 
+#export FFLAGS='-g -O0  -Wall -Bstatic -static -Wextra -fcheck=all -fbounds-check -fbacktrace'
 export FFLAGS=' -O3  -Wall -Bstatic -static -Wextra -fcheck=all -fbounds-check -fbacktrace'
 
 MAIN=GEOSChem_he5_create
