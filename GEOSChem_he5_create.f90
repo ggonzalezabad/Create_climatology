@@ -100,7 +100,8 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
   ! ---------------------------------------
   REAL*8 :: val
   INTEGER :: status, ilon, ilat, ilev
-  INTEGER*4, ALLOCATABLE, DIMENSION(:,:,:) :: out_lut_data
+  INTEGER*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: out_lut_data
+  REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: out_lut_weig
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:) :: out_data_3d
   REAL*4, ALLOCATABLE, DIMENSION(:,:,:,:) :: out_data_4d
 
@@ -153,7 +154,8 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
   noutlat = INT(ABS(flat-llat)/dlat+1.0,KIND=2)
   ALLOCATE (out_lon(noutlon)); ALLOCATE (out_lat(noutlat))
   ALLOCATE (out_time(nhrs))
-  ALLOCATE (out_data_3d(noutlon,noutlat,nhrs),out_lut_data(noutlon,noutlat,nhrs))
+  ALLOCATE (out_data_3d(noutlon,noutlat,nhrs),out_lut_data(noutlon,noutlat,nhrs,2), &
+       out_lut_weig(noutlon,noutlat,nhrs,2))
   ALLOCATE (out_data_4d(noutlon,noutlat,nlev,nhrs))
   out_lon = [(REAL(ideg,KIND=4)*dlon, ideg = 0, noutlon-1)]+flon
   out_lat = [(REAL(ideg,KIND=4)*dlat, ideg = 0, noutlat-1)]+flat
@@ -188,6 +190,8 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
   IF ( he5stat /= 0 ) CALL he5_error_stop ( 'HE5_SWdefdim', nLevDim )
   he5stat = HE5_SWdefdim ( swath_id, nHrsDim, INT(nhrs,8) )
   IF ( he5stat /= 0 ) CALL he5_error_stop ( 'HE5_SWdefdim', nHrsDim )
+  he5stat = HE5_SWdefdim ( swath_id, nTwoDim, INT(2,8) ) 
+  IF ( he5stat /= 0 ) CALL he5_error_stop ( 'HE5_SWdefdim', nTwoDim )
 
   ! --------------------------
   ! Define Geolocation Fields
@@ -348,12 +352,36 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                  !column to scale
                  CALL RANDOM_NUMBER(scale)
                  scale = SUM(out_data_4d(1,1,1:nlev,ihrs))+scale*(350.0)+180.0
-                 IF ( ABS(out_lat(ilat)) .LE. 30.0 ) THEN
-                    out_lut_data(ilon,ilat,ihrs) = L_idx(MINLOC(ABS(L_val-scale),1))
+                 IF ( ABS(out_lat(ilat)) .LE. 20.0 ) THEN
+                    out_lut_data(ilon,ilat,ihrs,1) = L_idx(MINLOC(ABS(L_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,2) = L_idx(MINLOC(ABS(L_val-scale),1))
+                    
+                    out_lut_weig(ilon,ilat,ihrs,1) = 1.0
+                    out_lut_weig(ilon,ilat,ihrs,2) = 0.0
+                 ELSE IF ( ABS(out_lat(ilat)) .GT. 20.0 .AND. ABS(out_lat(ilat)) .LE. 30.0 ) THEN
+                    out_lut_data(ilon,ilat,ihrs,1) = L_idx(MINLOC(ABS(L_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,2) = M_idx(MINLOC(ABS(M_val-scale),1))
+
+                    out_lut_weig(ilon,ilat,ihrs,1) = 1.0 - ((out_lat(ilat)-20.0) / (30.0-20.0))
+                    out_lut_weig(ilon,ilat,ihrs,2) = (out_lat(ilat)-20.0) / (30.0-20.0)
                  ELSE IF ( ABS(out_lat(ilat)) .GT. 30.0 .AND. ABS(out_lat(ilat)) .LE. 55.0 ) THEN
-                    out_lut_data(ilon,ilat,ihrs) = M_idx(MINLOC(ABS(M_val-scale),1))
-                 ELSE
-                    out_lut_data(ilon,ilat,ihrs) = H_idx(MINLOC(ABS(H_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,1) = M_idx(MINLOC(ABS(M_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,2) = M_idx(MINLOC(ABS(M_val-scale),1))
+
+                    out_lut_weig(ilon,ilat,ihrs,1) = 1.0
+                    out_lut_weig(ilon,ilat,ihrs,2) = 0.0
+                 ELSE IF ( ABS(out_lat(ilat)) .GT. 55.0 .AND. ABS(out_lat(ilat)) .LE. 65.0 ) THEN
+                    out_lut_data(ilon,ilat,ihrs,1) = M_idx(MINLOC(ABS(M_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,2) = H_idx(MINLOC(ABS(H_val-scale),1))
+
+                    out_lut_weig(ilon,ilat,ihrs,1) = 1.0 - ((out_lat(ilat)-55.0) / (65.0-55.0))
+                    out_lut_weig(ilon,ilat,ihrs,2) = (out_lat(ilat)-55.0) / (65.0-55.0)
+                 ELSE IF ( ABS(out_lat(ilat)) .GT. 65.0 .AND. ABS(out_lat(ilat)) .LE. 90.0 ) THEN
+                    out_lut_data(ilon,ilat,ihrs,1) = H_idx(MINLOC(ABS(H_val-scale),1))
+                    out_lut_data(ilon,ilat,ihrs,2) = H_idx(MINLOC(ABS(H_val-scale),1))
+
+                    out_lut_weig(ilon,ilat,ihrs,1) = 1.0
+                    out_lut_weig(ilon,ilat,ihrs,2) = 0.0
                  ENDIF                    
               END DO 
            END DO
@@ -425,18 +453,26 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
              out_data_4d )
         CASE ("LUT Ozone Profile")
            print*, 'Writing LUT ozone profile...'
-           he5_start_3 = (/ 0, 0, 0 /)
-           he5_stride_3 = (/ 1, 1, 1 /)
-           he5_edge_3 = (/ noutlon, noutlat, nhrs /)
+           he5_start_4 = (/ 0, 0, 0, 0 /)
+           he5_stride_4 = (/ 1, 1, 1, 1 /)
+           he5_edge_4 = (/ noutlon, noutlat, nhrs, 2 /)
            he5stat = HE5_SWwrfld ( swath_id, &
-                TRIM(ADJUSTL(DataFieldNames(idf))), he5_start_3, he5_stride_3, he5_edge_3, &
+                TRIM(ADJUSTL(DataFieldNames(idf))), he5_start_4, he5_stride_4, he5_edge_4, &
                 out_lut_data )
+        CASE ("LUT Ozone Weight ")
+           print*, 'Writing LUT ozone profile weight...'
+           he5_start_4 = (/ 0, 0, 0, 0 /)
+           he5_stride_4 = (/ 1, 1, 1, 1 /)
+           he5_edge_4 = (/ noutlon, noutlat, nhrs, 2 /)
+           he5stat = HE5_SWwrfld ( swath_id, &
+                TRIM(ADJUSTL(DataFieldNames(idf))), he5_start_4, he5_stride_4, he5_edge_4, &
+                out_lut_weig )
      CASE DEFAULT
         WRITE(*,*) 'Warning!! Field '//TRIM(ADJUSTL(DataFieldNames(idf)))//' not found.' 
      END SELECT
   END DO wrtdatafields
 
-  DEALLOCATE (out_data_3d,out_lut_data,out_data_4d)
+  DEALLOCATE (out_data_3d,out_lut_data,out_lut_weig,out_data_4d)
   ! ----------------------
   ! Detach from this swath
   ! ----------------------

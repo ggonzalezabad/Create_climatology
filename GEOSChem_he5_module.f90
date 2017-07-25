@@ -96,14 +96,15 @@ MODULE GEOSChem_he5_module
   CHARACTER (LEN= 4), PARAMETER :: nLatDim = 'nLat'
   CHARACTER (LEN= 4), PARAMETER :: nLevDim = 'nLev'
   CHARACTER (LEN= 4), PARAMETER :: nHrsDim = 'nHrs'
+  CHARACTER (LEN= 4), PARAMETER :: nTwoDim = 'nTwo'
   CHARACTER (LEN= 9), PARAMETER :: n2Dim   = 'nLon,nLat'
   CHARACTER (LEN=14), PARAMETER :: n3Dim   = 'nLon,nLat,nHrs'
   CHARACTER (LEN=19), PARAMETER :: n4Dim   = 'nLon,nLat,nLev,nHrs'
-
+  CHARACTER (LEN=19), PARAMETER :: n4Dim2  = 'nLon,nLat,nHrs,nTwo'
   ! ----------------------------------------------
   ! Number of data and geolocation fields in swath
   ! ----------------------------------------------
-  INTEGER, PARAMETER :: ndf = 6, ngf = 3
+  INTEGER, PARAMETER :: ndf = 7, ngf = 3
 
   ! ------------------------------
   ! Names of Data Fields in Swaths
@@ -136,7 +137,8 @@ MODULE GEOSChem_he5_module
        "HCHO             ", &
        "H2O              ", &
        "NO2              ", &
-       "LUT Ozone Profile" /)
+       "LUT Ozone Profile", &
+       "LUT Ozone Weight "/)
        
 
   ! ------------------------------
@@ -148,12 +150,14 @@ MODULE GEOSChem_he5_module
        "DU      ", &
        "DU      ", &
        "DU      ", &
+       "Unitless", &
        "Unitless" /) 
  
   ! --------------------------------------
   ! Scale factors of Data Fields in Swaths
   ! --------------------------------------
   REAL (KIND=r4), DIMENSION (ndf), PARAMETER :: ScaleFactors = (/ &
+       1.0E-00_r4,  &
        1.0E-00_r4,  &
        1.0E-00_r4,  &
        1.0E-00_r4,  &
@@ -170,7 +174,8 @@ MODULE GEOSChem_he5_module
        "HCHO Layer Partial Column", &
        "H2O Layer Partial Column ", &
        "NO2 Layer Partial Column ", &
-       "LUT Ozone Profile        "  /)
+       "LUT Ozone Profile        ", &
+       "LUT Ozone Profile Weight "  /)
 
   ! ------------------------------
   ! Names of Data Provider
@@ -214,7 +219,12 @@ CONTAINS
        he5stat = HE5_SWsetfill( swath_id, TRIM(ADJUSTL(DataFieldNames(ifield))), &
             HE5T_NATIVE_INT, fill_value_i4)
        he5stat = HE5_SWdefdfld ( swath_id, &
-            TRIM(ADJUSTL(DataFieldNames(ifield))),  n3Dim, " ", HE5T_Native_INT, he5_hdfe_nomerge )
+            TRIM(ADJUSTL(DataFieldNames(ifield))),  n4Dim2, " ", HE5T_Native_INT, he5_hdfe_nomerge )
+    ELSE IF ( TRIM(ADJUSTL(DataFieldNames(ifield))) == 'LUT Ozone Weight' ) THEN 
+       he5stat = HE5_SWsetfill( swath_id, TRIM(ADJUSTL(DataFieldNames(ifield))), &
+            HE5T_NATIVE_FLOAT, fill_value)
+       he5stat = HE5_SWdefdfld ( swath_id, &
+            TRIM(ADJUSTL(DataFieldNames(ifield))),  n4Dim2, " ", HE5T_Native_FLOAT, he5_hdfe_nomerge )
     ELSE
        he5stat = HE5_SWsetfill( swath_id, TRIM(ADJUSTL(DataFieldNames(ifield))), &
             HE5T_NATIVE_FLOAT, fill_value)
