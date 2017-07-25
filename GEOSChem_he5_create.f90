@@ -351,7 +351,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
                  !For a given latitudinal band just pick the ozone profile with the closest total
                  !column to scale
                  CALL RANDOM_NUMBER(scale)
-                 scale = SUM(out_data_4d(1,1,1:nlev,ihrs))+scale*(350.0)+180.0
+                 scale = SUM(out_data_4d(ilon,ilat,1:nlev,ihrs))/du+scale*(350.0)+180.0
                  IF ( ABS(out_lat(ilat)) .LE. 20.0 ) THEN
                     out_lut_data(ilon,ilat,ihrs,1) = L_idx(MINLOC(ABS(L_val-scale),1))
                     out_lut_data(ilon,ilat,ihrs,2) = L_idx(MINLOC(ABS(L_val-scale),1))
@@ -382,7 +382,7 @@ SUBROUTINE create_he5_file ( he5file, sensor, month)
 
                     out_lut_weig(ilon,ilat,ihrs,1) = 1.0
                     out_lut_weig(ilon,ilat,ihrs,2) = 0.0
-                 ENDIF                    
+                 ENDIF  
               END DO 
            END DO
         END DO
